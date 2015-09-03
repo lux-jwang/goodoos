@@ -130,7 +130,14 @@ class Model(object):
         return comm
 
     def get_mutual_user_ids(self,item_id1, item_id2):
-        return
+        u_ids1 = self.get_users(item_id1)
+        u_ids2 = self.get_users(item_id2)
+        if len(u_ids1) < 1 or len(u_ids2) < 1:
+            print "should not be x..x!!!!!!! "
+            return None
+        comm = list(set(u_ids1).intersection(u_ids2))
+        #comm = list((Counter(i_ids1) & Counter(i_ids2)).elements())
+        return comm
 
     def get_multiple_users_mean_rate(self,user_ids):
         mean_rates = {}
