@@ -1,3 +1,5 @@
 from cosinesimilarity import CosineSimilarity
 from jaccardsimilarity import JaccardSimilarity
 from reputationsimilarity import ReputationSimilarity
+from phimatrix import PhiMatrix
+from deltamatrix import DeltaMatrix
