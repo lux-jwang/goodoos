@@ -31,6 +31,7 @@ def get_predict(u_id, i_id, model, mat_delta,mat_phi):
     item_ids = list(model.get_items(u_id))
     nom = 0
     denom = 0
+
     pre_delta_xa = mat_delta[i_id]
     pre_phi_xa = mat_phi[i_id]
     pre_ratings = model.raw_data[u_id]
@@ -51,7 +52,7 @@ def get_predict(u_id, i_id, model, mat_delta,mat_phi):
     if denom < 1:
         return 0
     
-    return nom/float(denom)
+    return nom/denom
 
 
 def get_matrix_predict(model,mat_delta,mat_phi):
@@ -61,8 +62,9 @@ def get_matrix_predict(model,mat_delta,mat_phi):
 
     for u_id in user_ids:
         pred_matrix.setdefault(u_id,{})
+        pre_model = model.raw_data[u_id]
         for i_id in item_ids:
-            if model.get_rate(u_id,i_id,False):
+            if i_id in pre_model:
                 continue
             prid_rate = get_predict(u_id,i_id,model,mat_delta,mat_phi)
             pred_matrix[u_id][i_id] = prid_rate

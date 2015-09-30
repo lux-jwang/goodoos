@@ -1,10 +1,13 @@
+
+import numpy as np
+from multiprocessing import Pool
 from kfold import KFold
 from evaluator import Evaluator
 from evaluators.childevaluators import GlobalConsineEvaluator, GlobalJaccardEvaluator
 from evaluators.childevaluators import FriendsConsineEvaluator, FriendsJaccardEvaluator
 from evaluators.childevaluators import NMFevaluator, FriendsReputationEvaluator,\
                                        GlobalReputationEvaluator, FriendStrangerEvaluator,\
-                                       JphEvaluator
+                                       JphEvaluator, EsoricsSingleUserInfluenceEvaluator
 
 
 class GlobalCosineKfold(KFold):
@@ -116,6 +119,35 @@ class JphKfold(KFold):
         valuator = JphEvaluator(train_set, test_set, self.friends_data)
         return valuator.evaluate(self.metrics)
 
+
+class EsoricsSingleUserValidation(KFold):
+    def __init__(self,k,data_set,friends_data, f_n, t_n, f_ratio):
+        super(EsoricsSingleUserValidation,self).__init__(k,data_set)
+        self.friends_data = friends_data
+        self.f_n = f_n
+        self.t_n = t_n
+        self.f_ratio = f_ratio
+
+        return
+
+    def cross_validate(self):
+        xresults = []
+
+        for oth in range(0,50):  #spcial test trick
+            print "start: ", oth, "/50 run..."
+            for ith in range(0,self.K):               
+                train_set, test_set = self.constuct_data_set(ith)
+                result = self.validate(train_set,test_set)
+                xresults.extend(result)
+            valuator = EsoricsSingleUserInfluenceEvaluator(None, None, None, 0, 0, 0)
+            valuator.reset_predictor_cache()
+        return xresults
+
+
+    def validate(self,train_set,test_set):
+        valuator = EsoricsSingleUserInfluenceEvaluator(train_set, test_set, self.friends_data, self.f_n, self.t_n, self.f_ratio)
+        res1 = valuator.evaluate()
+        return res1
 
 
 

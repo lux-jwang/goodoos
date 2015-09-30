@@ -2,9 +2,10 @@ import numpy as np
 
 class Evaluator(object):
     def __init__(self, training_set, testing_set):
-        self.training_model = self.build_model(training_set)
-        self.testing_model = self.build_model(testing_set)
-        self.predictor = self.build_predictor(self.training_model)
+        if training_set and testing_set:
+            self.training_model = self.build_model(training_set)
+            self.testing_model = self.build_model(testing_set)
+            self.predictor = self.build_predictor(self.training_model)
         return
 
 
@@ -18,8 +19,10 @@ class Evaluator(object):
             test_item_ids = self.testing_model.get_items(u_id)
             est_prefs = self.predictor.estimate_preference_mul_items(u_id,test_item_ids)
             est_preferneces.extend(est_prefs)
+            user_rates = self.testing_model.raw_data[u_id]
             for t_id in test_item_ids:
-                rate = self.testing_model.get_rate(u_id,t_id,ts=False)
+                rate, __ = user_rates[t_id]
+                #rate = self.testing_model.get_rate(u_id,t_id,ts=False)
                 real_preferneces.append(float(rate))  
 
         #a2 = np.subtract(est_preferneces,real_preferneces)

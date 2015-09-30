@@ -103,9 +103,11 @@ class Friends_Strangers(Contributors):
 
     def get_rand_friends(self, user_id):
         f_ids = self.model.get_friends(user_id,level=1)
+
         shuffle(f_ids)
         frs = f_ids[:self.f_n]
         fnbs = self.similarity.get_similarities(user_id,frs)
+        #print "fnbs: ", len(fnbs)
         return fnbs
 
     def get_rand_strangers(self, user_id):

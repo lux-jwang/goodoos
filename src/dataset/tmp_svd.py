@@ -13,7 +13,7 @@ from recsys.algorithm.factorize import SVD
 from recsys.datamodel.data import Data
 from recsys.evaluation.prediction import RMSE, MAE
 
-from datawasher import get_friends_data, get_user_item_matrix
+from datawasher import get_friends_data, get_user_item_matrix, get_moive100k
 
 PERCENT_TRAIN = 80
 local_dir = path.dirname(path.realpath(__file__))
@@ -30,7 +30,6 @@ def get_friend_matrix(u_ids, raw_data):
             i_idx += 1
             rate, ts = raw_data[u_id][i_id]
             idata.add_tuple((float(rate),u_idx,i_idx))
-            #print (float(rate),u_id,i_id)
 
     return idata
 
@@ -124,16 +123,7 @@ def friend_svd(raw_data, friends_data):
         my_user.extend(f_list)
         my_user.append(u_id)
         my_user = unique_list(my_user)
-        #print my_user
         print "----------------->: ", ind, "/", len(friends_data.keys()), len(my_user)
-        test = {}
-        for u_id in my_user:
-            if u_id in test:
-                test[u_id] = test[u_id] + 1
-        for ky in test:
-            if test[ky] > 1:
-                print "dead..............................................."
-                return
 
         
         #idata = get_friend_matrix(my_user,raw_data)
@@ -145,9 +135,6 @@ def friend_svd(raw_data, friends_data):
 
         if len(my_user) < 1:
             print u_id, len(friends_data[u_id]), len(f_list)
-            print "=============================================================================="
-            print "=============================================================================="
-            print "=============================================================================="
             continue
         continue
         result = evaluate(idata)

@@ -1,9 +1,10 @@
+import numpy as np
 from evaluator import Evaluator
 from models.model import Model
 from models.friendsmodel import FriendsModel
 from models.reputationmodel import ReputationModel
 from predictors.basicbiaspredictor import BasicBiasPredictor
-from predictors.esoricspredictor import EsoricsPredictor
+from predictors.esoricspredictor import EsoricsPredictor, EsoricsPredictor_F1, EsoricsPredictor_T1
 from predictors.nmfpredictor import NMFpredictor
 from predictors.jphpredictor import JphPredictor
 from predictors.contributors import Neighbors, Friends, Neighbors_Friends, Friends_Strangers,JphNeighbors
@@ -196,5 +197,49 @@ class JphEvaluator(Evaluator):
     #    return self.friends_data.keys()
 
 
+class EsoricsSingleUserInfluenceEvaluator(Evaluator):
+    def __init__(self,training_set, testing_set, friends_data, f_n, t_n, f_ratio):
+        self.friends_data = friends_data
+        self.f_n = f_n
+        self.t_n = t_n
+        self.f_ratio = f_ratio
+        super(EsoricsSingleUserInfluenceEvaluator,self).__init__(training_set,testing_set)
+        return
 
+    def build_model(self,train_set):
+        i_model = FriendsModel(train_set, self.friends_data)
+        return i_model
+
+    def build_predictor(self,model):
+        similarity = CosineSimilarity(model)
+        ctrbtor = Friends_Strangers(similarity,self.f_n,self.t_n)
+        #if not EsoricsPredictor_F1.user_cache:
+        #    print "clear user cache..."
+        #else:
+        #    print "... ",len(EsoricsPredictor_F1.user_cache.keys())
+        predictor = EsoricsPredictor_T1(ctrbtor,self.f_ratio)
+        return predictor
+
+    def get_testing_users(self):
+        return self.friends_data.keys()
+
+    def reset_predictor_cache(self):
+        #print "begin clear..."
+        EsoricsPredictor_T1.user_cache = {}
+
+    def evaluate(self):
+        est_preferneces1 = []
+        est_preferneces2 = []
+        test_u_ids = self.get_testing_users()
+        for u_id in test_u_ids:
+            test_item_ids = self.testing_model.get_items(u_id)
+            for i_id in test_item_ids:
+                est_prefs1 = round(self.predictor.predict(u_id,i_id),4)
+                est_preferneces1.append(est_prefs1)
+                est_prefs2 = round(self.predictor.predict(u_id,i_id),4)
+                est_preferneces2.append(est_prefs2)
+            
+        est_preferneces = np.subtract(est_preferneces1,est_preferneces2)
+ 
+        return est_preferneces
         

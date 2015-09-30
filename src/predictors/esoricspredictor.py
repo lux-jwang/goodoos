@@ -55,3 +55,75 @@ class EsoricsPredictor(Predictor):
             delta = float(ri)-ru
 
         return delta
+
+
+class EsoricsPredictor_F1(EsoricsPredictor):
+    user_cache = {}
+    def __init__(self, contributors, f_ratio):
+        super(EsoricsPredictor_F1,self).__init__(contributors, f_ratio)
+        #self.friends_cache = None
+        self.oed = 0
+        return
+
+    def get_target_users(self,user_id):
+        if user_id in EsoricsPredictor_F1.user_cache:
+            t_users = EsoricsPredictor_F1.user_cache[user_id]
+        else:
+            t_users = self.contributors.get_rand_friends(user_id)
+            EsoricsPredictor_F1.user_cache[user_id] = t_users
+        return t_users
+
+    def reset_user_cache(self,user_id):
+        EsoricsPredictor_F1.user_cache = None
+        return
+
+
+    def predict_by_friends(self, user_id, item_id):
+        ru  = self.model.get_user_rate_mean(user_id)
+        fs = []
+        if self.oed%2 == 0:
+            t_fs = self.get_target_users(user_id)
+            fs = t_fs[:-1]
+        else:
+            t_fs = self.get_target_users(user_id)
+            fs = t_fs[1:]
+        self.oed += 1
+        fnb_delta = self.get_delta(fs,item_id)
+        pref = ru+fnb_delta
+
+        return pref
+
+class EsoricsPredictor_T1(EsoricsPredictor):
+    user_cache = {}
+    def __init__(self, contributors, f_ratio):
+        super(EsoricsPredictor_T1,self).__init__(contributors, f_ratio)
+        self.oed = 0
+        return
+
+    def reset_user_cache(self,user_id):
+        EsoricsPredictor_T1.user_cache = None
+        return
+
+    def predict_by_strangers(self, user_id, item_id):
+        ru  = self.model.get_user_rate_mean(user_id)
+        fs = []
+        if self.oed%2 == 0:
+            t_fs = self.get_target_users(user_id)
+            fs = t_fs[:-1]
+        else:
+            t_fs = self.get_target_users(user_id)
+            fs = t_fs[1:] 
+        self.oed += 1
+        fnb_delta = self.get_delta(fs,item_id)
+        pref = ru+fnb_delta
+
+        return pref
+
+    def get_target_users(self,user_id):
+        if user_id in EsoricsPredictor_T1.user_cache:
+            t_users = EsoricsPredictor_T1.user_cache[user_id]
+        else:
+            t_users = self.contributors.get_rand_strangers(user_id)
+            EsoricsPredictor_T1.user_cache[user_id] = t_users
+        return t_users
+

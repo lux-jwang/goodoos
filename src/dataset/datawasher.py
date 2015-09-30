@@ -201,9 +201,6 @@ def get_friends_data_index():
 
 
 
-
-
-
 def get_user_item_matrix():
     dst_filename = local_dir+"/mid_data/user_item_matrix.mat"
     if path.isfile(dst_filename):
@@ -250,8 +247,22 @@ def get_moive100k(load_timestamp=True):
     return data_movies
 
 
+def get_twittermovie_matrix():
+    rating_file = local_dir+"/twitter/ratings.dat"
+    rate_dat = np.loadtxt(rating_file, delimiter='::', dtype=str)
+    mat = {}
+
+    for u_id, i_id, rating, tm in rate_dat:
+        if float(rating) < 0.1:
+            continue
+        mat.setdefault(u_id,{})
+        mat[u_id][i_id] = (rating,tm)
+
+    return mat
+
+
 if __name__ == '__main__':
     #get_friends_data_index()
-    construct_data_set(10,10)
+    construct_data_set(5,5)
     #formate_reputation_data()
     

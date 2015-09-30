@@ -15,6 +15,8 @@ def get_friends_similarity(sim_mat, friend_data):
     sim_dict = {}
     for ky, values in friend_data.iteritems():
         ky_sims = sim_mat.get_similarities(ky,values)
+        if not ky_sims:
+            continue
         f_id, simz = zip(*ky_sims)
         sim_dict[ky] = simz
         for item in simz:
@@ -35,7 +37,8 @@ def get_strangers_similarity(sim_mat, friend_data):
     return sim_dict
 
 
-
+#plt.scatter(txs, tys, color='k', marker=r'$\bigodot$', alpha=0.9,label="strangers")
+#plt.scatter(fxs, fys, color='gray', marker=r'$\bullet$', alpha=0.6,label="friends")
 def draw_similarity(friend_sims, stranger_sims):
     #print friend_sims
     fys, fxs=zip(*((x, k) for k in friend_sims for x in friend_sims[k]))
@@ -44,8 +47,11 @@ def draw_similarity(friend_sims, stranger_sims):
     fig = plt.figure()
     ax = fig.add_subplot(111) 
 
-    plt.plot(txs, tys, 'b>',alpha=0.9,label="strangers")
-    plt.plot(fxs, fys, 'ro',alpha=0.6,label="friends")
+    #plt.plot(txs, tys, 'k>',alpha=0.9,label="strangers")
+    #plt.plot(fxs, fys, 'c*',alpha=0.6,label="friends")
+
+    plt.plot(txs, tys, ' ', color='lightgrey', marker=r's', alpha=0.9,label="strangers")
+    plt.plot(fxs, fys, ' ',color='k', marker='>', alpha=0.8,label="friends")
 
     plt.title('Cosine Similarity')
     plt.axis('tight')
