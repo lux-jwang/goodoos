@@ -132,22 +132,29 @@ class EsoricsSingleUserValidation(KFold):
 
     def cross_validate(self):
         xresults = []
+        tt_idx = 0
+        ss_idx = 0
+        ssum_idx = 0
 
         for oth in range(0,50):  #spcial test trick
             print "start: ", oth, "/50 run..."
             for ith in range(0,self.K):               
                 train_set, test_set = self.constuct_data_set(ith)
-                result = self.validate(train_set,test_set)
+                result, t_idx, s_idx, sum_idx = self.validate(train_set,test_set)
                 xresults.extend(result)
+                tt_idx += t_idx
+                ss_idx += s_idx
+                ssum_idx += sum_idx
             valuator = EsoricsSingleUserInfluenceEvaluator(None, None, None, 0, 0, 0)
             valuator.reset_predictor_cache()
+        print ":=> ", tt_idx, " ", ss_idx, " ", ssum_idx
         return xresults
 
 
     def validate(self,train_set,test_set):
         valuator = EsoricsSingleUserInfluenceEvaluator(train_set, test_set, self.friends_data, self.f_n, self.t_n, self.f_ratio)
-        res1 = valuator.evaluate()
-        return res1
+        res1, t_idx, s_idx, sum_idx = valuator.evaluate()
+        return res1, t_idx, s_idx, sum_idx
 
 
 

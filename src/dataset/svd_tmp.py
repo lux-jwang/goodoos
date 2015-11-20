@@ -7,7 +7,7 @@ from recsys.datamodel.data import Data
 from recsys.algorithm.factorize import SVD
 from recsys.evaluation.prediction import RMSE, MAE
 
-from datawasher import get_twittermovie_matrix, get_moive100k
+from datawasher import get_twittermovie_matrix, get_moive100k, get_moive1m
 
 PERCENT_TRAIN = 80
 KKK = 100

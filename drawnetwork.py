@@ -5,6 +5,7 @@ import sys
 # We need to import the graph_tool module itself
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
 from graph_tool.all import *
 sys.path.append("./src")
 from dataset import get_friends_data_index
@@ -48,8 +49,9 @@ def get_shortest_distance(gx,srcs):
 
     print "average degree: ", np.mean(valid_distance)
     #hist
+    matplotlib.rcParams.update({'font.size':28})
     title = "Six Degrees of Separation ( Avg: "+str(round(np.mean(valid_distance),4))+" )"
-    plt.hist(valid_distance)
+    plt.hist(valid_distance, bins=10, facecolor='grey')
     plt.title(title)
     plt.xlabel("Degrees")
     plt.ylabel("Frequency")
@@ -83,10 +85,10 @@ def show_graphic(gx):
 if __name__ == '__main__':
 
     g, ui_mat = construct_graphic()
-    #srcs = ui_mat.keys()
-    #get_shortest_distance(g,srcs)
+    srcs = ui_mat.keys()
+    get_shortest_distance(g,srcs)
     #get_shortest_distance_uni(g)
-    show_graphic(g)
+    #show_graphic(g)
 
 
 

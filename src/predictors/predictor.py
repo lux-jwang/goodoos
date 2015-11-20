@@ -34,6 +34,7 @@ class Predictor(object):
         return prefs
 
     def is_calculated(self,user_id, item_id):
+        return False
         if not user_id in self.preferences:
             return False
         if not item_id in self.preferences[user_id]:
@@ -42,6 +43,7 @@ class Predictor(object):
         return True
 
     def update_cache(self,user_id,item_id,pref_value):
+        return
         self.preferences.setdefault(user_id,{})
         self.preferences[user_id][item_id] = pref_value
 

@@ -247,6 +247,27 @@ def get_moive100k(load_timestamp=True):
     return data_movies
 
 
+def get_moive1m(load_timestamp=True):
+    base_dir =  local_dir+'/movie1m/'
+    #Read data
+#    if load_timestamp:
+#        data_m = np.loadtxt(base_dir + 'movielens1m.item',
+#                delimiter='\t', dtype=int)
+#        data_movies = {}
+#        for user_id, item_id, rating, timestamp in data_m:
+#            data_movies.setdefault(user_id, {})
+#            data_movies[user_id][item_id] = (int(rating),timestamp)
+#    else:
+    data_m = np.loadtxt(base_dir + 'movielens1m.data',
+            delimiter='\t', usecols=(0, 1, 2), dtype=int)
+    data_movies = {}
+    for user_id, item_id, rating in data_m:
+        data_movies.setdefault(user_id, {})
+        data_movies[user_id][item_id] = int(rating)
+
+    return data_movies
+
+	
 def get_twittermovie_matrix():
     rating_file = local_dir+"/twitter/ratings.dat"
     rate_dat = np.loadtxt(rating_file, delimiter='::', dtype=str)

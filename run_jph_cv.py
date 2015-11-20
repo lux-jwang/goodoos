@@ -7,7 +7,7 @@ from models import Model, FriendsModel
 from similarities import CosineSimilarity, JaccardSimilarity
 from dataset import get_friends_data, get_user_item_matrix, get_user_item_matrix_sub, \
                     get_reputation, get_original_user_item_matrix,get_original_UI, \
-                    get_moive100k
+                    get_moive100k, get_moive1m
 from evaluators import GlobalJaccardKfold,FriendsJaccardKfold,FriendsCosineKfold, \
                        GlobalCosineKfold,NMFKfold, FriendsReputationKfold, \
                        GlobalReputationKfold, FriendStrangerKfold,\
@@ -20,6 +20,14 @@ def get_metrics_methods():
 
 def  get_moive100k_acc_cv():
     raw_data = get_moive100k()
+    mtrs = get_metrics_methods()
+    jkx = JphKfold(5,raw_data,metrics=mtrs)
+    mscore = jkx.cross_validate()
+    print mscore
+    return
+
+def  get_moive1m_acc_cv():
+    raw_data = get_moive1m()
     mtrs = get_metrics_methods()
     jkx = JphKfold(5,raw_data,metrics=mtrs)
     mscore = jkx.cross_validate()

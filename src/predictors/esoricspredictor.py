@@ -1,4 +1,4 @@
-
+import numpy as np
 from predictor import Predictor
 
 class EsoricsPredictor(Predictor):
@@ -20,13 +20,12 @@ class EsoricsPredictor(Predictor):
         fs = self.contributors.get_rand_friends(user_id)
         fnb_delta = self.get_delta(fs,item_id)
         pref = ru+fnb_delta
-
         return pref
 
     def predict_by_strangers(self, user_id, item_id):
         ru  = self.model.get_user_rate_mean(user_id)
         ts = self.contributors.get_rand_strangers(user_id)
-        tnb_delta = self.get_delta(ts,item_id)
+        tnb_delta  = self.get_delta(ts,item_id)
         pref = ru+tnb_delta
 
         return pref
@@ -34,6 +33,8 @@ class EsoricsPredictor(Predictor):
     def get_delta(self,users,item_id):
         t_delta = 0
         t_sim = 0
+        r_d = 0.0
+
         for u_id, sim in users:
             delta = self.get_one_delta(u_id,item_id)
             if delta is None:
@@ -41,17 +42,19 @@ class EsoricsPredictor(Predictor):
             t_delta += float(delta)*float(sim)
             t_sim += sim
         
-        if t_sim == 0:
-            return 0.0
-        r_d = float(t_delta)/float(t_sim)
+        if np.abs(t_sim) > 0:
+            r_d = float(t_delta)/float(t_sim)
+
         return r_d
+        
+        
 
     def get_one_delta(self,user_id,item_id):
         delta = None
-        ru  = self.model.get_user_rate_mean(user_id)
         rate = self.model.get_rate(user_id,item_id)
         if not rate is None:
-            ri, ts = rate
+            ru  = self.model.get_user_rate_mean(user_id)
+            ri, _ = rate
             delta = float(ri)-ru
 
         return delta
@@ -76,21 +79,35 @@ class EsoricsPredictor_F1(EsoricsPredictor):
     def reset_user_cache(self,user_id):
         EsoricsPredictor_F1.user_cache = None
         return
-
+    
+    def get_rating_detail(self, u_ids, i_id):
+        ratings = []
+        for u_id,sim in u_ids:
+            rating = self.model.get_rate(u_id,i_id, ts = False)
+            if not rating:
+                rating = 0
+            else:
+                rating = 1
+            ratings.append(rating)
+        return ratings
+        
 
     def predict_by_friends(self, user_id, item_id):
         ru  = self.model.get_user_rate_mean(user_id)
-        fs = []
-        if self.oed%2 == 0:
-            t_fs = self.get_target_users(user_id)
+        fs = None
+        fnb_delta = 0
+        t_fs = self.get_target_users(user_id)
+        self.rating_x = self.get_rating_detail(t_fs,item_id)
+        if self.oed%2 == 0:   
             fs = t_fs[:-1]
+            fnb_delta = self.get_delta(fs,item_id)
         else:
-            t_fs = self.get_target_users(user_id)
             fs = t_fs[1:]
-        self.oed += 1
-        fnb_delta = self.get_delta(fs,item_id)
-        pref = ru+fnb_delta
+            fnb_delta = self.get_delta(fs,item_id)
 
+        self.oed += 1
+
+        pref = ru+fnb_delta
         return pref
 
 class EsoricsPredictor_T1(EsoricsPredictor):
@@ -104,14 +121,25 @@ class EsoricsPredictor_T1(EsoricsPredictor):
         EsoricsPredictor_T1.user_cache = None
         return
 
+    def get_rating_detail(self, u_ids, i_id):
+        ratings = []
+        for u_id,sim in u_ids:
+            rating = self.model.get_rate(u_id,i_id, ts = False)
+            if not rating:
+                rating = 0
+            else:
+                rating = 1
+            ratings.append(rating)
+        return ratings
+
     def predict_by_strangers(self, user_id, item_id):
         ru  = self.model.get_user_rate_mean(user_id)
         fs = []
-        if self.oed%2 == 0:
-            t_fs = self.get_target_users(user_id)
+        t_fs = self.get_target_users(user_id)
+        self.rating_x = self.get_rating_detail(t_fs,item_id)
+        if self.oed%2 == 0:   
             fs = t_fs[:-1]
         else:
-            t_fs = self.get_target_users(user_id)
             fs = t_fs[1:] 
         self.oed += 1
         fnb_delta = self.get_delta(fs,item_id)

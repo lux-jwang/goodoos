@@ -217,7 +217,7 @@ class EsoricsSingleUserInfluenceEvaluator(Evaluator):
         #    print "clear user cache..."
         #else:
         #    print "... ",len(EsoricsPredictor_F1.user_cache.keys())
-        predictor = EsoricsPredictor_T1(ctrbtor,self.f_ratio)
+        predictor = EsoricsPredictor_F1(ctrbtor,self.f_ratio)
         return predictor
 
     def get_testing_users(self):
@@ -225,21 +225,44 @@ class EsoricsSingleUserInfluenceEvaluator(Evaluator):
 
     def reset_predictor_cache(self):
         #print "begin clear..."
-        EsoricsPredictor_T1.user_cache = {}
+        EsoricsPredictor_F1.user_cache = {}
+
+    def print_rating_detail(self, u_ids, i_id):
+        #print len(u_ids)
+        for u_id in u_ids:
+            rating = self.training_model.get_rate(u_id,i_id, ts=False)
+            print rating, "  ",
+        print " "
 
     def evaluate(self):
         est_preferneces1 = []
         est_preferneces2 = []
         test_u_ids = self.get_testing_users()
+        t_idx = 0
+        s_idx = 0
+        arr_idx = 0
         for u_id in test_u_ids:
             test_item_ids = self.testing_model.get_items(u_id)
+            user_rates = self.testing_model.raw_data[u_id]
+            idx = 0
             for i_id in test_item_ids:
                 est_prefs1 = round(self.predictor.predict(u_id,i_id),4)
                 est_preferneces1.append(est_prefs1)
                 est_prefs2 = round(self.predictor.predict(u_id,i_id),4)
                 est_preferneces2.append(est_prefs2)
+                t_idx += 1
+                if np.abs(est_prefs1- est_prefs2) >0.5:
+                    s_idx +=1
+                    #real_prefs,_ = user_rates[i_id]
+                    #print est_prefs1, "  ", est_prefs2,"  ", real_prefs, " ", est_prefs1-est_prefs2
+                    #print "ru_x, fnb1, fnb2: ", self.predictor.ru_x, self.predictor.fnb_x1,  self.predictor.fnb_x2
+                    #print self.predictor.rating_x
+                    x_sum = np.sum(self.predictor.rating_x)
+                    if x_sum == 1:
+                        arr_idx += 1
+                    
             
         est_preferneces = np.subtract(est_preferneces1,est_preferneces2)
  
-        return est_preferneces
+        return est_preferneces, t_idx, s_idx, arr_idx
         

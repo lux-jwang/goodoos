@@ -16,7 +16,7 @@ def show_data(ivector):
     #hist
     #font = {'family':'normal', 'weight':'bold', 'size':22}
     matplotlib.rcParams.update({'font.size':28})
-    title = "Single Stranger's Influence ( Avg: "+str(round(np.mean(ivector),4))+" )"
+    title = "Single Friend's Influence ( Avg: "+str(round(np.mean(ivector),4))+" )"
     n, bins, patches = plt.hist(ivector, bins=200, facecolor='grey')
     plt.title(title)
     plt.xlabel("Difference")
@@ -40,8 +40,8 @@ def show_statistic(ivector):
 
 
 def run_single_influence(raw_data, friend_data):
-    f_n = 11
-    t_n = 10
+    f_n = 10
+    t_n = 11
     ratio = 0.8
     esvlidation = EsoricsSingleUserValidation(5,raw_data,friend_data,f_n,t_n,ratio)
     results = esvlidation.cross_validate()

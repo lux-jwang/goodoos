@@ -13,7 +13,7 @@ from recsys.algorithm.factorize import SVD
 from recsys.datamodel.data import Data
 from recsys.evaluation.prediction import RMSE, MAE
 
-from datawasher import get_friends_data, get_user_item_matrix, get_moive100k
+from datawasher import get_friends_data, get_user_item_matrix, get_moive100k, get_moive1m
 
 PERCENT_TRAIN = 80
 local_dir = path.dirname(path.realpath(__file__))

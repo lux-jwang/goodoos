@@ -4,6 +4,7 @@ from similarities import CosineSimilarity, JaccardSimilarity
 from dataset import get_friends_data, get_user_item_matrix
 from models.friendsmodel import FriendsModel
 import matplotlib.pyplot as plt
+import matplotlib
 import numpy as np
 
 
@@ -30,7 +31,9 @@ def get_friends_level_2(model):
     print "min_f", min_f
     print "max_f", max_f
 
-    plt.hist(t_f)
+    matplotlib.rcParams.update({'font.size':28})
+
+    plt.hist(t_f, bins=10, facecolor='grey')
     plt.title("Friend Num Level-2 Histogram")
     plt.xlabel("Friend Num")
     plt.ylabel("Frequency")

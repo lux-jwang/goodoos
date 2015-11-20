@@ -4,6 +4,7 @@ from similarities import CosineSimilarity, JaccardSimilarity
 from dataset import get_friends_data, get_user_item_matrix
 from models.friendsmodel import FriendsModel
 import matplotlib.pyplot as plt
+import matplotlib
 
 def get_similarity_matrix(data_set, friend_data):
     i_model = FriendsModel(data_set, friend_data)
@@ -41,24 +42,29 @@ def get_strangers_similarity(sim_mat, friend_data):
 #plt.scatter(fxs, fys, color='gray', marker=r'$\bullet$', alpha=0.6,label="friends")
 def draw_similarity(friend_sims, stranger_sims):
     #print friend_sims
+    matplotlib.rcParams.update({'font.size':28})
+
     fys, fxs=zip(*((x, k) for k in friend_sims for x in friend_sims[k]))
     tys, txs=zip(*((xt, kt) for kt in stranger_sims for xt in stranger_sims[kt]))
 
     fig = plt.figure()
     ax = fig.add_subplot(111) 
 
+    #matplotlib.rcParams.update({'font.size':28})
+
     #plt.plot(txs, tys, 'k>',alpha=0.9,label="strangers")
     #plt.plot(fxs, fys, 'c*',alpha=0.6,label="friends")
 
-    plt.plot(txs, tys, ' ', color='lightgrey', marker=r's', alpha=0.9,label="strangers")
-    plt.plot(fxs, fys, ' ',color='k', marker='>', alpha=0.8,label="friends")
+    stranger, = plt.plot(txs, tys, ' ', color='lightgrey', marker=r's', alpha=0.9,label="strangers",)
+    friend, = plt.plot(fxs, fys, ' ',color='k', marker='>', alpha=0.8,label="friends")
 
     plt.title('Cosine Similarity')
     plt.axis('tight')
     plt.ylabel("Similarity")
     plt.xlabel("User ID")
 
-    plt.legend() 
+
+    plt.legend(loc='lower right') 
     plt.show()
 
 

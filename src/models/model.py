@@ -28,7 +28,7 @@ class Model(object):
         u_ids = self.raw_data.keys()
         for u_id in u_ids:
             for i_id in self.raw_data[u_id].keys():
-                rate, ts = self.raw_data[u_id][i_id]
+                rate = self.raw_data[u_id][i_id]
                 if rate > max_rate:
                     max_rate = rate
                 if rate < min_rate:
@@ -70,7 +70,7 @@ class Model(object):
         if ts:
             return self.raw_data[user_id][item_id]
         else:
-            rate, ts = self.raw_data[user_id][item_id]
+            rate = self.raw_data[user_id][item_id]
             return float(rate)
 
     def get_items(self,user_id):
