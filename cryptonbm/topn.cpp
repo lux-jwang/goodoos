@@ -1,161 +1,165 @@
+
+
 #include "topn.h"
 
-void perform_topn_stranger(const int *pRt, int item_size, BIGPOLY *pIb, BIGPOLY *pBias)
+void perform_topn_stranger(CSTMARK int *pRt, BIGPOLYARRAY *pIb, BIGPOLYARRAY *pBias, int item_size)
 {
-	if(NULL == pRt || NULL == pIb || NULL == pQb){
+	if(NULL == pRt || NULL == pIb || NULL == pBias){
 		return;
 	}
-
-     int imean = get_mean(pRt);
-
+     
+     int imean = get_mean(pRt, item_size);
+     int bias = 0;
+     int idct = 0;
 
      for(int indx=0; indx<item_size; indx++)
      {
      	if(pRt[indx]==0){
-     		continue;
+     		bias = 0;
+     		idct = 0;
      	}
+     	else{
+     		bias = pRt[indx] - imean;
+     		idct = 1;
+     	}
+    	
+     	pBias[indx]  = enc_bigpoly(init_bigpoly(bias));
+     	pIb[indx] = enc_bigpoly(init_bigpoly(idct));
 
-     	bias = pRt[indx] - imean;
-     	pIb[indx] = init_bigpoly(bias);
-     	pBias[indx] = init_bigpoly(1);
-     }
-	
-
+     }	
 }
 
-void perform_topn_friend(const int *pRf, const BIGPOLY wuf, int item_size, BIGPOLY *pIb, BIGPOLY *pBias)
+void perform_topn_friend(CSTMARK int *pRf, CSTMARK BIGPOLYARRAY wuf, BIGPOLYARRAY *pIb, BIGPOLYARRAY *pBias, int item_size)
 {
-	perform_topn_stranger(pRf, item_size, pIb, pBias);
+	perform_topn_stranger(pRf, pIb, pBias,item_size);
 
 	for(int indx=0; indx<item_size; indx++)
 	{
 		pBias[indx] = MUL_C(pBias[indx], wuf);
 	}
-
 }
 
-void perform_topn_server(const BIGPOLY *pFs, int f_num, const BIGPOLY *pTs, int t_num, \
-	 const BIGPOLY *pQFs, const BIGPOLY *pQTs, const BIGPOLY **pMx, const BIGPOLY **pMy, const int item_size)
+void perform_topn_server(CSTMARK BIGPOLYARRAY **pFs, CSTMARK BIGPOLYARRAY **pTs, CSTMARK BIGPOLYARRAY **pQFs, \
+	 CSTMARK BIGPOLYARRAY **pQTs, int alpha, int beta, int item_size, int f_num, int t_num)
 {
+	if(NULL==pFs || NULL==pTs || NULL==pQFs || NULL==pQTs){
+		return;
+	}
+
+	BIGPOLYARRAY *pXu = new BIGPOLYARRAY[item_size];
+	BIGPOLYARRAY *pYu = new BIGPOLYARRAY[item_size];
+
+
+	BIGPOLY ab = init_bigpoly(alpha+beta); //alpha+beta === 10;
+	BIGPOLY bp_alpha = init_bigpoly(alpha); 
+	BIGPOLY bp_beta = init_bigpoly(beta);
 
 	for(int indx=0; indx<item_size; indx++)
 	{
-		BIGPOLY dt init_bigpoly(0);
-		BIGPOLY nt init_bigpoly(0);
-		BIGPOLY df init_bigpoly(0);
-		BIGPOLY nf init_bigpoly(0);
+		BIGPOLYARRAY dt = enc_bigpoly(init_bigpoly(0));
+		BIGPOLYARRAY nt = enc_bigpoly(init_bigpoly(0));
+		BIGPOLYARRAY df = enc_bigpoly(init_bigpoly(0));
+		BIGPOLYARRAY nf = enc_bigpoly(init_bigpoly(0));
 
 
 		for(int itu=0; itu<t_num; itu++)
 		{
-			nt = MUL_C(pTs[itu][indx],nt);
-			dt = MUL_C(pQTs[itu][indx],dt)
+			nt = ADD_C(pTs[itu][indx],nt);
+			dt = ADD_C(pQTs[itu][indx],dt);
 		}
 
 		for(int ifu=0; ifu<f_num; ifu++)
 		{
-			nf = MUL_C(pTs[ifu][indx],nf);
-			df = MUL_C(pQTs[ifu][indx],df)
-
+			nf = ADD_C(pFs[ifu][indx],nf);
+			df = ADD_C(pQFs[ifu][indx],df);
 		}
 
 		//get x
-		BIGPOLY tmp1 = MUL_P(MUL_C(nt,df),beta);
-        BIGPOLY tmp2 = MUL_P(MUL_C(nF,dT),alpha);
-        BIGPOLY x_u = ADD_C(tmp1,tmp2);
+		BIGPOLYARRAY tmp1 = MUL_P(MUL_C(nt,df),bp_beta);
+        BIGPOLYARRAY tmp2 = MUL_P(MUL_C(nf,dt),bp_alpha);
+        BIGPOLYARRAY x_u = ADD_C(tmp1,tmp2);
         pXu[indx] = x_u;
 
         //get y
-        int tmp1 = alpha+beta;
-        BIGPOLY tmp2 = MUL_C(dt,df);
-        BIGPOLY y_u = ADD_P(tmp2, tmp1);
+        //int tmp1 = alpha+beta;  alpha+beta = 10;
+        BIGPOLYARRAY tmp3 = MUL_C(dt,df);
+        BIGPOLYARRAY y_u = ADD_P(tmp3, ab);
         pYu[indx] = y_u;
 	}
 
+    /*
+     * Rank results
+    **/
 
-	BIGPOLY *pU = new BIGPOLY[item_size];
-	BIGPOLY *pV = new BIGPOLY[item_size];
-
-	for(int indx=0; indx<item_size; indx++)
-	{
-	     BIGPOLY tmp1 =  dot_vector(pMx[indx],x_u);
-	     pU[indx] = tmp1;
-	     BIGPOLY tmp2 = dot_vector(pMy[indx],y_u);
-	     pV[indx] = tmp2;
-	}
-
-	tdsc_rank(pU,PV);
-
-	delete[] Pu;
-	delete[] Pv;
-
+     delete[] pXu;
+     delete[] pYu;
 }
 
-void perform_topn(UID u_id, int item_size)
+
+void perform_topn(UID u_id)
 {
-	int f_num=0, t_num=0;
-	int **pFdata = get_friend_data(u_id,f_num);
-	int **pTdata = get_stranger_data(u_id, t_num);
+	int f_num=0, t_num=0, item_size=0;
+	int **pFdata = get_friend_data(u_id,f_num,item_size);
+	int **pTdata = get_stranger_data(u_id, t_num,item_size);
 	int *pUsim = get_user_sim(u_id);
-	BIGPOLY **pMx = get_MX(u_id);
-	BIGPOLY **pMy = get_MX(u_id);
 
 	if(NULL==pFdata || NULL==pFdata || NULL==pFdata){
 		return;
 	}
 
-	BIGPOLY *pTs = new BIGPOLY[t_num];
-	BIGPOLY *pFs = new BIGPOLY[f_num];
-	BIGPOLY *pBvec = new BIGPOLY[item_size];
-	BIGPOLY *pUvec = new BIGPOLY[item_size];
-	BIGPOLY *pQTs = new BIGPOLY[t_num];
-	BIGPOLY *pQFs = new BIGPOLY[f_num];
+    BIGPOLY *pUvec = new BIGPOLY[f_num];
+	BIGPOLYARRAY *pUavec = new BIGPOLYARRAY[f_num];
+	init_bigpoly_vec(pUsim,pUvec,f_num);
+	enc_bigpoly_vec(pUvec,pUavec, f_num);
+
+
+	BIGPOLYARRAY** pQTs = new BIGPOLYARRAY*[t_num];
+	BIGPOLYARRAY** pBATs = new BIGPOLYARRAY*[t_num];
+	BIGPOLYARRAY** pQFs = new BIGPOLYARRAY*[f_num];
+	BIGPOLYARRAY** pBAFs = new BIGPOLYARRAY*[f_num];
+
+
 
     for(int indx=0; indx<t_num; indx++)
     {
-    	perform_topn_stranger()
+    	BIGPOLYARRAY *pBavec = new BIGPOLYARRAY[item_size];
+    	BIGPOLYARRAY *pIb = new BIGPOLYARRAY[item_size];
+    	perform_topn_stranger(pTdata[indx], pIb, pBavec, item_size);
 
+    	pQTs[indx] = pIb;
+    	pBATs[indx] = pBavec;
     }
 
     for(int indx=0; indx<f_num; indx++)
     {
-    	perform_topn_friend()
+    	BIGPOLYARRAY *pBavec = new BIGPOLYARRAY[item_size];
+    	BIGPOLYARRAY *pIb = new BIGPOLYARRAY[item_size];
+    	perform_topn_friend(pTdata[indx],pUavec[indx],pIb,pBavec,item_size);
+
+    	pQFs[indx] = pIb;
+    	pBAFs[indx] = pBavec;
     }
 
-    perform_topn_server()
-
-
-
+    perform_topn_server(pBAFs,pBATs,pQFs,pBATs,8, 2,item_size,f_num,t_num);
 
     //clear mem
-	delete[] pTs;
-	delete[] pFs;
-	delete[] pUsim;
-	delete[] pBvec;
-	delete[] pIb;
-	delete[] pUvec;
-
-	for(int indx=0; indx<item_size; indx++)
-	{
-		delete[] pMx[indx];
-		delete[] pMy[indx];
-	}
-
-	for(int indx=0; indx<f_num; indx++)
-	{
+	for(int indx=0; indx<f_num; indx++){
 		delete[] pFdata[indx];
+		delete[] pQFs[indx];
+		delete[] pBAFs[indx];
 	}
 
-	for(int indx=0; indx<t_num; indx++)
-	{
+	for(int indx=0; indx<t_num; indx++){
 		delete[] pTdata[indx];
+		delete[] pQTs[indx];
+		delete[] pBATs[indx];
 	}
 
+	delete[] pFdata;
+	delete[] pTdata;
+	delete[] pQFs;
+	delete[] pBAFs;
+	delete[] pQTs;
+	delete[] pBATs;
 }
 
-
-
-
-
-
-}

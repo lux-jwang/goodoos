@@ -1,8 +1,8 @@
 # Makefile for SEAL examples
-BIN_DIR=../bin
-INCLUDE_DIR=../SEAL
+BIN_DIR=.
+INCLUDE_DIR=./SEAL
 CXXFLAGS=-Wall -Wno-unused-function -std=c++11 -O3 -I$(INCLUDE_DIR)
-SRCS=main.cpp spp.cpp top.cpp
+SRCS=main.cpp spp.cpp topn.cpp nbmutils.cpp
 OBJS=$(SRCS:.cpp=.o)
 SEALRUN=$(BIN_DIR)/tdsc.exe
 

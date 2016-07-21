@@ -1,7 +1,13 @@
-#include "utils.h"
+#ifndef LUX_TOPN_H
+#define LUX_TOPN_H
 
 
-void perform_topn_stranger(const BIGPOLY *pIb, const int *pRt, int item_size, BIGPOLY &rib, BIGPOLY &qtb);
-void perform_topn_friend(const BIGPOLY *pIb, const int *pRf, const BIGPOLY wuf, int item_size, BIGPOLY &rib, BIGPOLY &qfb);
-void perform_topn_server(BIGPOLY *pFs, int f_size, BIGPOLY *pTs, int t_size, BIGPOLY *pQFs, int qf_size, BIGPOLY *pQTs, int qt_size, BIGPOLY x_u , BIGPOLY &y_u);
+#include "nbmutils.h"
+
+void perform_topn_stranger(CSTMARK int *pRt, BIGPOLYARRAY *pIb, BIGPOLYARRAY *pBias, int item_size);
+void perform_topn_friend(CSTMARK int *pRf, CSTMARK BIGPOLYARRAY wuf, BIGPOLYARRAY *pIb, BIGPOLYARRAY *pBias, int item_size);
+void perform_topn_server(CSTMARK BIGPOLYARRAY **pFs, CSTMARK BIGPOLYARRAY **pTs, CSTMARK BIGPOLYARRAY **pQFs, \
+	 CSTMARK BIGPOLYARRAY **pQTs, int alpha, int beta, int item_size, int f_num, int t_num);
 void perform_topn(UID u_id, int *pTgt, int tgt_size, int item_size);
+
+#endif

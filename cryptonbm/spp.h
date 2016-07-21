@@ -1,11 +1,12 @@
+#ifndef LUX_SPP_H
+#define LUX_SPP_H
 
-#include "utils.h"
+#include "nbmutils.h"
 
-using namespace std;
-
-
-
-void perform_spp_stranger(const BIGPOLY *pIb, const int *pRt, int item_size, BIGPOLY &rib, BIGPOLY &qtb);
-void perform_spp_friend(const BIGPOLY *pIb, const int *pRf, const BIGPOLY wuf, int item_size, BIGPOLY &rib, BIGPOLY &qfb);
-void perform_spp_server(BIGPOLY *pFs, int f_size, BIGPOLY *pTs, int t_size, BIGPOLY *pQFs, int qf_size, BIGPOLY *pQTs, int qt_size, BIGPOLY x_u , BIGPOLY &y_u);
+void perform_spp_stranger(CSTMARK BIGPOLYARRAY *pIb, CSTMARK int *pRt, int item_size, BIGPOLYARRAY &rib, BIGPOLYARRAY &qtb);
+void perform_spp_friend(CSTMARK BIGPOLYARRAY *pIb, CSTMARK int *pRf, CSTMARK BIGPOLYARRAY wuf, int item_size, BIGPOLYARRAY &rib, BIGPOLYARRAY &qfb);
+void perform_spp_server(CSTMARK BIGPOLYARRAY *pFs, CSTMARK BIGPOLYARRAY *pTs, CSTMARK BIGPOLYARRAY *pQFs, CSTMARK BIGPOLYARRAY *pQTs, \
+	 BIGPOLY alpha, BIGPOLY beta, int f_size, int t_size, BIGPOLYARRAY x_u , BIGPOLYARRAY &y_u );
 void perform_spp(UID u_id, int *pTgt, int tgt_size, int item_size);
+
+#endif

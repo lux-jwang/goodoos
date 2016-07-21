@@ -4,20 +4,23 @@
 
 int main ( int argc, char *argv[] )
 {
-	if(argc < 3)
-	{
-		return;
-
+	if(argc < 3){
+		return 0;
 	}
 
-	int runt = int(argv[1]);
-	UID u_id = argv[2];
+	//int runt = int(*argv[1]);
+	//UID u_id = int(*argv[2]);
+	int runt=1;
 
 	switch(runt){
 		case 1:
-		    perform_spp();
+		cout << "1..." << endl; 
+		break;
 		case 2:
-		    perform_topn(u_id);
+		cout << "2.." << endl;	
+		break;
 	}
+
+	return 0;
 
 }
