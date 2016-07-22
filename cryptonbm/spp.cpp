@@ -7,14 +7,8 @@ void perform_spp_stranger(CSTMARK BIGPOLYARRAY *pIb, CSTMARK int *pRt, int item_
          return;
     }
 
-    int *pBias = new int[item_size]();
-    int qmean = 0;
-
-    for(int indx=0; indx<item_size; indx++){
-    	qmean += pRt[indx];
-    }
-    qmean /= item_size;
-
+    int *pBias = new int[item_size](); 
+    int qmean = get_mean(pRt, item_size);
 
     for(int indx=0; indx<item_size; indx++)
     {
@@ -24,10 +18,11 @@ void perform_spp_stranger(CSTMARK BIGPOLYARRAY *pIb, CSTMARK int *pRt, int item_
     	}
     	pBias[indx] = pRt[indx] - qmean;
     }
-
+    
 
     rib = enc_bigpoly(init_bigpoly(0));
     qtb = enc_bigpoly(init_bigpoly(0));
+
 
     for(int indx=0; indx<item_size; indx++)
     {
@@ -35,10 +30,16 @@ void perform_spp_stranger(CSTMARK BIGPOLYARRAY *pIb, CSTMARK int *pRt, int item_
     	if(pRt[indx]==0){
     		continue;
     	}
-    	BIGPOLY tmp = MUL_P(pIb[indx],init_bigpoly(1));
-    	rib = ADD_C(rib,tmp);
-    	qtb = ADD_C(MUL_P(pIb[indx],init_bigpoly(1)),qtb);  //2*qt
+
+    	BIGPOLYARRAY tmp = MUL_P(pIb[indx],init_bigpoly(1));
+
+    	if(pBias[indx]!=0)
+    	{
+    		rib = ADD_C(rib,MUL_P(tmp, init_bigpoly(pBias[indx])));
+    	}
+    	qtb = ADD_C(tmp,qtb);  //2*qt ?
     }
+    
 
     delete[] pBias;
 }
@@ -48,30 +49,31 @@ void perform_spp_friend(CSTMARK BIGPOLYARRAY *pIb, CSTMARK int *pRf, CSTMARK BIG
 {
 	perform_spp_stranger(pIb,pRf,item_size,rib,qfb);
 	rib =  MUL_C(rib,wuf);
-	qfb = MUL_C(qfb,wuf);	
+	qfb =  MUL_C(qfb,wuf);
+
 }
 
 
 void perform_spp_server(CSTMARK BIGPOLYARRAY *pFs, CSTMARK BIGPOLYARRAY *pTs, CSTMARK BIGPOLYARRAY *pQFs, CSTMARK BIGPOLYARRAY *pQTs, \
-	 BIGPOLY alpha, BIGPOLY beta, BIGPOLY ab, int f_size, int t_size, BIGPOLYARRAY x_u , BIGPOLYARRAY &y_u )
+	 BIGPOLY alpha, BIGPOLY beta, BIGPOLY ab, int f_size, int t_size, BIGPOLYARRAY &x_u , BIGPOLYARRAY &y_u )
 {
     if(NULL == pFs || NULL == pTs){
          return;
     }
 
-    BIGPOLY nt = sum_vector(pTs,t_size);
-    BIGPOLY dt = sum_vector(pQTs,t_size);
+    BIGPOLYARRAY nt = sum_vector(pTs,t_size);
+    BIGPOLYARRAY dt = sum_vector(pQTs,t_size);
 
-    BIGPOLY nf = sum_vector(pFs,f_size);
-    BIGPOLY df = sum_vector(pQFs,f_size);
+    BIGPOLYARRAY nf = sum_vector(pFs,f_size);
+    BIGPOLYARRAY df = sum_vector(pQFs,f_size);
 
     //get X
-    BIGPOLY tmp1 = MUL_P(MUL_C(nt,df),beta);
-    BIGPOLY tmp2 = MUL_P(MUL_C(nf,dt),alpha);
-    x_u = ADD_C(tmp1,tmp2);
+    BIGPOLYARRAY tmp1 = MUL_P(MUL_C(nt,df),beta);
+    BIGPOLYARRAY tmp2 = MUL_P(MUL_C(nf,dt),alpha);
 
+    x_u = ADD_C(tmp1,tmp2);
     //get y
-    BIGPOLY tmp3 = MUL_C(dt,df);
+    BIGPOLYARRAY tmp3 = MUL_C(dt,df);
     y_u = MUL_P(tmp3,ab);
 
 }

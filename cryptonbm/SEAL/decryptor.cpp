@@ -72,6 +72,18 @@ namespace seal
         {
             plain_modulus_.resize(coeff_bit_count);
         }
+        
+        cout << "coeff_count: "<< secret_key_.coeff_count() << ", " << coeff_count << endl;
+        cout << "coeff_bit_count: "<< secret_key_.coeff_bit_count() << ", " << coeff_bit_count  << endl;
+        cout << "significant_coeff_count: "<< secret_key_.significant_coeff_count() << ", " << coeff_count  << endl;
+
+        if(!are_poly_coefficients_less_than(secret_key_, coeff_modulus_))
+        {
+             cout << "are_poly_coefficients_less_than(secret_key_, coeff_modulus_) " << endl;
+
+        }
+
+
         if (secret_key_.coeff_count() != coeff_count || secret_key_.coeff_bit_count() != coeff_bit_count ||
             secret_key_.significant_coeff_count() == coeff_count || !are_poly_coefficients_less_than(secret_key_, coeff_modulus_))
         {

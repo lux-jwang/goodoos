@@ -3,15 +3,15 @@
 #ifndef LUX_NBMUTILS_H
 #define LUX_NBMUTILS_H
 
-#define SIM
+//#define SIM
 #define CSTMARK 
 
 #define ADD_C  add_c
 #define ADD_P  add_p
 #define MUL_C  mul_c
 #define MUL_P  mul_p
-#define SUB_c  SUB_c
-#define SUB_p  SUB_P
+#define SUB_C  sub_c
+#define SUB_P  sub_p
 
 #define UID int
 
@@ -54,12 +54,17 @@ typedef vector<BIGPOLYARRAY> BPAvec;
 typedef vector<BIGPOLY> BPvec;
 **/
 
-BIGPOLY add_c(BIGPOLYARRAY a, BIGPOLYARRAY b);
-BIGPOLY add_p(BIGPOLYARRAY a, BIGPOLY b);
-BIGPOLY mul_c(BIGPOLYARRAY a, BIGPOLYARRAY b);
-BIGPOLY mul_p(BIGPOLYARRAY a, BIGPOLY b);
+BIGPOLYARRAY add_c(BIGPOLYARRAY a, BIGPOLYARRAY b);
+BIGPOLYARRAY add_p(BIGPOLYARRAY a, BIGPOLY b);
+BIGPOLYARRAY mul_c(BIGPOLYARRAY a, BIGPOLYARRAY b);
+BIGPOLYARRAY mul_p(BIGPOLYARRAY a, BIGPOLY b);
+BIGPOLYARRAY sub_c(BIGPOLYARRAY a, BIGPOLYARRAY b);
+BIGPOLYARRAY sub_p(BIGPOLYARRAY a, BIGPOLY b);
 BIGPOLY init_bigpoly(int val);
 BIGPOLYARRAY enc_bigpoly(BIGPOLY val);
+bool equal_c(BIGPOLYARRAY a, BIGPOLYARRAY b);
+
+
 void init_bigpoly_vec(int *pVec, BIGPOLY *pBpvec, int item_size);
 void enc_bigpoly_vec(BIGPOLY *pBpvec, BIGPOLYARRAY *pBpavec, int item_size);
 BIGPOLYARRAY sum_vector(BIGPOLYARRAY *pBpavec, int item_size);

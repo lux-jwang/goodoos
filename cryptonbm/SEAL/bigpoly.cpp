@@ -400,6 +400,7 @@ namespace seal
 
         // Initialize class.
         coeff_count_ = coeff_count;
+        //cout << "bigpoly 402: "<< coeff_count << endl;
         coeff_bit_count_ = coeff_bit_count;
         value_ = value;
         is_alias_ = true;
