@@ -18,11 +18,12 @@ void perform_spp_stranger(CSTMARK BIGPOLYARRAY *pIb, CSTMARK int *pRt, int item_
     	}
     	pBias[indx] = pRt[indx] - qmean;
     }
+
+    BIGPOLYARRAY init_zero = enc_bigpoly(init_bigpoly(0));
+    BIGPOLY init_one_p = init_bigpoly(1);
     
-
-    rib = enc_bigpoly(init_bigpoly(0));
-    qtb = enc_bigpoly(init_bigpoly(0));
-
+    rib = init_zero;
+    qtb = init_zero;
 
     for(int indx=0; indx<item_size; indx++)
     {
@@ -31,22 +32,23 @@ void perform_spp_stranger(CSTMARK BIGPOLYARRAY *pIb, CSTMARK int *pRt, int item_
     		continue;
     	}
 
-    	BIGPOLYARRAY tmp = MUL_P(pIb[indx],init_bigpoly(1));
+    	BIGPOLYARRAY tmp = MUL_P(pIb[indx],init_one_p);
 
     	if(pBias[indx]!=0)
     	{
     		rib = ADD_C(rib,MUL_P(tmp, init_bigpoly(pBias[indx])));
     	}
+
     	qtb = ADD_C(tmp,qtb);  //2*qt ?
     }
     
-
     delete[] pBias;
 }
 
 
 void perform_spp_friend(CSTMARK BIGPOLYARRAY *pIb, CSTMARK int *pRf, CSTMARK BIGPOLYARRAY wuf, int item_size, BIGPOLYARRAY &rib, BIGPOLYARRAY &qfb)
 {
+	
 	perform_spp_stranger(pIb,pRf,item_size,rib,qfb);
 	rib =  MUL_C(rib,wuf);
 	qfb =  MUL_C(qfb,wuf);
@@ -61,11 +63,14 @@ void perform_spp_server(CSTMARK BIGPOLYARRAY *pFs, CSTMARK BIGPOLYARRAY *pTs, CS
          return;
     }
 
-    BIGPOLYARRAY nt = sum_vector(pTs,t_size);
-    BIGPOLYARRAY dt = sum_vector(pQTs,t_size);
+    BIGPOLYARRAY init_zero = enc_bigpoly(init_bigpoly(0));
 
-    BIGPOLYARRAY nf = sum_vector(pFs,f_size);
-    BIGPOLYARRAY df = sum_vector(pQFs,f_size);
+
+    BIGPOLYARRAY nt = sum_vector(pTs,t_size,init_zero);
+    BIGPOLYARRAY dt = sum_vector(pQTs,t_size,init_zero);
+
+    BIGPOLYARRAY nf = sum_vector(pFs,f_size,init_zero);
+    BIGPOLYARRAY df = sum_vector(pQFs,f_size,init_zero);
 
     //get X
     BIGPOLYARRAY tmp1 = MUL_P(MUL_C(nt,df),beta);
@@ -79,13 +84,12 @@ void perform_spp_server(CSTMARK BIGPOLYARRAY *pFs, CSTMARK BIGPOLYARRAY *pTs, CS
 }
 
 
-void perform_spp(UID u_id, int *pTgt, int tgt_size)
+void perform_spp(UID u_id, int *pTgt, int tgt_size, int f_num=70, int t_num=10, int item_size=1682)
 {
 
-	int f_num=0, t_num=0, item_size=1682;
 	int** pFdata = get_friend_data(u_id, f_num, item_size);
 	int** pTdata = get_stranger_data(u_id, t_num, item_size);
-	int* pUsim = get_user_sim(u_id);
+	int* pUsim = get_user_sim(u_id, f_num);
 
 	if(NULL==pFdata || NULL==pFdata || NULL==pFdata || NULL==pUsim ){
 		return;
@@ -94,6 +98,7 @@ void perform_spp(UID u_id, int *pTgt, int tgt_size)
 	BIGPOLY ab = init_bigpoly(10); //alpha+beta === 10;
 	BIGPOLY bp_alpha = init_bigpoly(8); 
 	BIGPOLY bp_beta = init_bigpoly(2);
+	BIGPOLYARRAY init_zero = enc_bigpoly(init_bigpoly(0));
 
 	BIGPOLYARRAY *pTs = new BIGPOLYARRAY[t_num];
 	BIGPOLYARRAY *pFs = new BIGPOLYARRAY[f_num];
@@ -106,16 +111,19 @@ void perform_spp(UID u_id, int *pTgt, int tgt_size)
 
 	int *pIb = new int[item_size]();
 	init_bigpoly_vec(pIb,pBvec,item_size);
+	//cout<<"start spp 10..."<<endl;
 	enc_bigpoly_vec(pBvec,pBavec, item_size);
 
 	init_bigpoly_vec(pUsim,pUvec,f_num);
 	enc_bigpoly_vec(pUvec,pUavec, f_num);
+	//cout<<"start spp 2..."<<endl;
 	
 	for(int tidx=0; tidx<tgt_size; tidx++)
 	{ 
 		pBavec[pTgt[tidx]] = enc_bigpoly(init_bigpoly(1));
 
-		for(int indx=0; indx<t_num; t_num++)
+		clock_t begin_time = clock();
+		for(int indx=0; indx<t_num; indx++)
 	    {
 	       BIGPOLYARRAY rib;
 	       BIGPOLYARRAY qb;
@@ -123,8 +131,10 @@ void perform_spp(UID u_id, int *pTgt, int tgt_size)
 		   pTs[indx] = rib;
 		   pQTs[indx] = qb;
 	    }
+	    cout <<"stranger stage >> u_id: "<<u_id<<" predict: "<<pTgt[tidx]<<"->  "<<  setprecision(5)<<float(clock ()-begin_time )/CLOCKS_PER_SEC <<" seconds" <<endl;
 
-	    for(int indx=0; indx<f_num; f_num++)
+	    begin_time = clock();
+	    for(int indx=0; indx<f_num; indx++)
 	    {
 	       BIGPOLYARRAY rib;
 	       BIGPOLYARRAY qb;
@@ -132,12 +142,17 @@ void perform_spp(UID u_id, int *pTgt, int tgt_size)
 		   pFs[indx] = rib;
 		   pQFs[indx] = qb;
 	    }
+	    cout <<"friend stage >> u_id: "<<u_id<<" predict: "<<pTgt[tidx]<<"->  "<<  setprecision(5)<<float(clock ()-begin_time )/CLOCKS_PER_SEC <<" seconds" <<endl;
 
 	    BIGPOLYARRAY xu;
 	    BIGPOLYARRAY yu;
 
+	    begin_time = clock();
 	    perform_spp_server(pFs, pTs, pQTs, pQFs,  bp_alpha, bp_beta, ab, f_num, t_num, xu, yu);
-	    pBavec[pTgt[tidx]]  = enc_bigpoly(init_bigpoly(0));
+	    cout <<"server stage >> u_id: "<<u_id<<" predict: "<<pTgt[tidx]<<"->  "<< setprecision(5)<<float(clock ()-begin_time )/CLOCKS_PER_SEC <<" seconds" <<endl;
+
+	    //reset
+	    pBavec[pTgt[tidx]]  = init_zero;
 
 	}
 
@@ -149,15 +164,10 @@ void perform_spp(UID u_id, int *pTgt, int tgt_size)
 	delete[] pUvec;
 	delete[] pBavec;
 
-    for(int indx=0; indx<f_num; indx++){
-		delete[] pFdata[indx];
-	}
-	
-	for(int indx=0; indx<t_num; indx++){
-		delete[] pTdata[indx];
-	}
-	delete[] pFdata;
-	delete[] pTdata;
+	delete_p2p<int>(pFdata,f_num);
+	delete_p2p<int>(pTdata,f_num);
+
+	cout<<"complete spp protocol..."<<endl;
 }
 
 

@@ -193,8 +193,19 @@ bool equal_c(BIGPOLYARRAY a, BIGPOLYARRAY b)
 
     int decoded1 = pwk->m_encoder.decode_int32(da);
     int decoded2 = pwk->m_encoder.decode_int32(db);
-    cout <<"a="<<decoded1<<";  b="<<decoded2<<endl;
+    //cout <<" equal_c: a="<<decoded1<<";  b="<<decoded2<<endl;
     return (decoded1 == decoded2);
+#endif
+}
+
+int get_plain_int(BIGPOLYARRAY a)
+{
+#ifdef SIM
+	return (a==b);
+#else
+	Worker *pwk = Worker::pInstance();
+    BigPoly da = pwk->m_decryptor.decrypt(a);
+    return pwk->m_encoder.decode_int32(da);
 #endif
 }
 
@@ -223,10 +234,11 @@ void enc_bigpoly_vec(BIGPOLY *pBpvec, BIGPOLYARRAY *pBpavec, int item_size)
 	}
 }
 
-
-BIGPOLYARRAY sum_vector(BIGPOLYARRAY *pBpavec, int item_size)
+//make sure that initialize sum_v to 0!!!!!!!!!!!!!!!!!!!!!!
+//for speed
+BIGPOLYARRAY sum_vector(BIGPOLYARRAY *pBpavec, int item_size, BIGPOLYARRAY  sum_v) //
 {
-    BIGPOLYARRAY sum_v = enc_bigpoly(init_bigpoly(0));
+    //BIGPOLYARRAY sum_v = enc_bigpoly(init_bigpoly(0));
     if(NULL == pBpavec){
     	return sum_v;
     }
@@ -288,26 +300,58 @@ BIGPOLYARRAY dot_vector(BIGPOLYARRAY *pVec1, BIGPOLYARRAY *pVec2, int item_size)
 
 }
 
-
 //-----------------------------------------------------------
 
-int** get_friend_data(UID u_id, int &f_num, int &item_size)
+int** get_data_2d(string filename, int user_num, int item_size)
 {
-	f_num = 4;
-	item_size = 5;
-	return NULL;
+	ifstream mydata(filename.c_str());
+	if(!mydata.good()){
+		cout<<"can not read file: "<<filename<<endl;
+		return NULL;
+	}
 
+   int **pData = create_p2p<int>(user_num, item_size); 
+
+   for(int udx=0; udx<user_num; udx++)
+   {
+   	 for(int idx=0; idx<item_size; idx++)
+   	 {
+   	 	mydata>>pData[udx][idx];
+   	 }
+   }
+
+   mydata.close();
+   return pData;
 }
 
-int** get_stranger_data(UID u_id, int &t_num, int &item_size)
-{
-	t_num = 4;
-	item_size = 5;
-	return NULL;
 
+int** get_friend_data(UID u_id, int f_num, int item_size)
+{
+	string f_name = "./data/friend_"+to_string(u_id)+"_"+to_string(f_num)+".dat";
+	return get_data_2d(f_name, f_num, item_size);
 }
 
-int* get_user_sim(UID u_id)
+int** get_stranger_data(UID u_id, int t_num, int item_size)
 {
-	return NULL;
+	string f_name = "./data/stranger_"+to_string(u_id)+"_"+to_string(t_num)+".dat";
+	return get_data_2d(f_name, t_num, item_size);
+}
+
+
+int* get_user_sim(UID u_id, int f_num)
+{
+	string f_name = "./data/similarity_"+to_string(u_id)+"_"+to_string(f_num)+".dat";
+	ifstream mydata(f_name.c_str());
+	if(!mydata.good()){
+		cout<<"can not read file: "<<f_name<<endl;
+		return NULL;
+	}
+
+	int *pData = new int[f_num];
+	for(int indx=0; indx<f_num; indx++){
+		mydata>>pData[indx];
+	}
+
+	mydata.close();
+	return pData;
 }
