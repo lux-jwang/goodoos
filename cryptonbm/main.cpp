@@ -1,4 +1,5 @@
 
+#include <ctime>
 #include <cstdlib>
 #include "spp.h"
 #include "topn.h"
@@ -22,17 +23,24 @@ int main ( int argc, char *argv[] )
 		return 0;
 	}
 
-	
-
-	int randtgt = std::rand()%item_size; //randomly predict one item for u_id
 	switch(runtype){
 		case 1:	
+		{
+		    int randtgt[3] = {0};
+            for(int indx=0; indx<3; indx++)
+            {
+    	        srand(time(NULL));
+	            randtgt[indx] = std::rand()%item_size; //randomly predict one item for u_id
+            }
 		    cout<<"start spp ..."<<endl;	    
-		    perform_spp(u_id, &randtgt, 1, f_num, t_num, item_size);    
+		    perform_spp(u_id, randtgt, 3, f_num, t_num, item_size);
+		    cout<<"...complete spp protocol"<<endl; 
+		}
 		break;
 		case 2:
 		    cout<<"start topn ..."<<endl;
-		    perform_topn(u_id, f_num, t_num, item_size);   
+		    perform_topn(u_id, f_num, t_num, item_size);  
+		    cout<<"...complete top protocol"<<endl; 
 		break;
 
 		default:
